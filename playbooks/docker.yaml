@@ -1,0 +1,38 @@
+# derived from following references:
+# https://www.digitalocean.com/community/tutorials/how-to-use-ansible-to-install-and-set-up-docker-on-ubuntu-18-04
+# https://docs.docker.com/engine/install/ubuntu/
+
+- name: install docker and setup docker env
+  hosts: all
+  become: yes
+  vars:
+    # bionic for ubuntu 20.04
+    ubuntu_version: bionic
+  tasks:
+    - name: install aptitude using apt
+      apt: name={{ item }} state=latest update_cache=yes
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+        - gnupg-agent
+    - name: add docker gpg apt key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    - name: add docker repo
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu {{ ubuntu_version }} stable
+    - name: install docker
+      apt: 
+        update_cache: yes 
+        state: latest        
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+    - name: enable docker and start
+      ansible.builtin.systemd:
+        state: started
+        name: docker

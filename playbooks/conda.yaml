@@ -1,0 +1,16 @@
+- name: install conda
+  hosts: all
+  tasks:
+  - name: download
+    get_url:
+      url: https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+      dest: /tmp/install-miniconda.sh
+      checksum: sha256:1314b90489f154602fd794accfc90446111514a5a72fe1f71ab83e07de9504a7
+      mode: 0550
+  - name: run installer
+    shell: /tmp/install-miniconda.sh -b -u
+  - name: remove installer
+    file:
+      state: absent
+      path: /tmp/install-miniconda.sh
+
