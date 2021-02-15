@@ -1,0 +1,23 @@
+- name: install packages
+  hosts: all
+  vars:
+    homedir: /home/kevin
+  roles:
+    - role: evandam.conda
+  tasks:
+    - name: setup conda environment
+      conda:
+        name: conda
+        state: latest
+        executable: "{{ homedir }}/miniconda3/bin/conda"
+    - name: install packages
+      conda:
+        name:
+          - pandas
+          - numpy
+          - tensorflow
+          - keras
+          - dask
+          - scikit-learn
+        environment: python3
+        executable: "{{ homedir }}/miniconda3/bin/conda"
