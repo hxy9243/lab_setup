@@ -17,6 +17,7 @@
         - curl
         - software-properties-common
         - gnupg-agent
+        - python3-pip
     - name: add docker gpg apt key
       apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
@@ -24,6 +25,9 @@
     - name: add docker repo
       apt_repository:
         repo: deb https://download.docker.com/linux/ubuntu {{ ubuntu_version }} stable
+    - name: install python library for automation
+      pip:
+        name: docker
     - name: install docker
       apt: 
         update_cache: yes 
