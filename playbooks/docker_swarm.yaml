@@ -1,0 +1,43 @@
+# references:
+# https://github.com/nmarus/docker-swarm-ansible/tree/master/playbooks/roles/swarm-managers/tasks
+# https://docs.ansible.com/ansible/2.8/plugins/inventory/docker_swarm.html
+
+- name: setup docker swarm
+  hosts: swarm_seed
+  become: yes
+  tasks:
+    - name: check if swarm has already been initialized
+      shell: docker node ls
+      register: swarm_status
+      ignore_errors: true
+    - name: start manager
+      shell: docker swarm init --advertise-addr "{{ inventory_hostname }}"
+      run_once: true
+      when: swarm_status.rc != 0
+    - name: get the manager join-token
+      shell: docker swarm join-token --quiet manager
+      register: manager_token
+    - name: Get the worker join-token
+      shell: docker swarm join-token --quiet worker
+      register: worker_token
+    - name: debug
+      debug:
+        var: manager_token['stdout']
+
+- name: join docker swarm      
+  hosts: swarm_managers
+  become: yes
+  vars:
+    swarm_port: 2377
+  tasks:
+  - name: Check if Swarm has already been initialized
+    shell: docker node ls
+    register: swarm_status
+    ignore_errors: true
+  - name: join docker swarm
+    shell: | 
+      docker swarm join \
+        "{{ groups['swarm_seed'][0] }}" \
+        --join "{{ hostvars[groups['swarm_seed'][0]]['manager_token']['stdout'] }}" \
+        --advertise-addr "{{ inventory_hostname }}"
+    when: swarm_status.rc != 0
