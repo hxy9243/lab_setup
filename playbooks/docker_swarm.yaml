@@ -38,6 +38,6 @@
     shell: | 
       docker swarm join \
         "{{ groups['swarm_seed'][0] }}" \
-        --join "{{ hostvars[groups['swarm_seed'][0]]['manager_token']['stdout'] }}" \
+        --token "{{ hostvars[groups['swarm_seed'][0]]['manager_token']['stdout'] }}" \
         --advertise-addr "{{ inventory_hostname }}"
     when: swarm_status.rc != 0
