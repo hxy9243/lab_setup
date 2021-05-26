@@ -1,0 +1,16 @@
+all:
+    hosts:
+        192.168.0.220:
+        192.168.0.221:
+        192.168.0.222:
+    children:
+        swarm_seed:
+            hosts:
+                192.168.0.220:
+        swarm_managers:
+            hosts:
+                192.168.0.221:
+                192.168.0.222:
+    vars:
+        ansible_user: kevin
+        ansible_sudo_pass: hellworld
