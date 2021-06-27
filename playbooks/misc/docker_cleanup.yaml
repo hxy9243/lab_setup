@@ -1,0 +1,11 @@
+- name: clean up docker
+  hosts: all
+  tasks:
+    - name: list stopped containers
+      become: yes
+      register: stopped_list
+      shell: docker ps --filter='status=exited' -q
+    - name: clean up stopped containers
+      become: yes
+      shell: docker stop {{ stopped_list.stdout }}
+      when: stopped_list.stdout != ""
