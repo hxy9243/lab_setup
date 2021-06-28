@@ -4,8 +4,14 @@
     - name: list stopped containers
       become: yes
       register: stopped_list
-      shell: docker ps --filter='status=exited' -q
+      shell: docker ps -aq --filter='status=exited'
+    - name: list dead containers
+      become: yes
+      register: dead_list
+      shell: docker ps -aq --filter='status=dead'
+
     - name: clean up stopped containers
       become: yes
-      shell: docker stop {{ stopped_list.stdout }}
-      when: stopped_list.stdout != ""
+      shell: docker rm {{ item }}
+      when: stopped_list.stdout != "" or dead_list.stdout != ""
+      loop: "{{ stopped_list.stdout_lines }} + {{ dead_list.stdout_lines }}"
