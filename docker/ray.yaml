@@ -1,0 +1,34 @@
+# To deploy the ray cluster to docker swarm with the docker-compose file, user needs to:
+# - label the head node with docker node label "rayhead":
+#     docker node label --label-add rayhead=true <node name>
+# - pass the env var to the stack deploy command "RAYHEAD_IP=<rayhead ip>"
+
+version: "3.8"
+
+services:
+  rayhead:
+    image: rayproject/ray
+    networks:
+      hostnet: {}
+    hostname: rayhead
+    command: ray start --head --block --dashboard-port 8265 --dashboard-host 0.0.0.0 --ray-client-server-port 8000
+    deploy:
+      placement:
+        constraints: [node.labels.rayhead == true]
+  rayworker:
+    image: rayproject/ray
+    hostname: rayworker
+    networks:
+      hostnet: {}
+    depends_on:
+      - rayhead
+    command: ray start --block --address "${RAYHEAD_IP}:6379"
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.labels.rayhead != true]
+
+networks:
+  hostnet:
+    external: true
+    name: host
